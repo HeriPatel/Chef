@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     Button loginBtn;
     Retrofit retrofit;
     ProgressDialog progressDialog;
-    FirebaseAuth auth;
+    //FirebaseAuth auth;
     String email, passwd;
     SharedPreferences sp;
     private static final String SHARED_PREF_NAME = "myPref";
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         chefEmail = findViewById(R.id.chefEmail);
         chefPasswd = findViewById(R.id.chefPasswd);
         loginBtn = findViewById(R.id.chefLogin);
-        auth = FirebaseAuth.getInstance();
+        //auth = FirebaseAuth.getInstance();
 
         chefEmail.addTextChangedListener(loginTextWatcher);
         chefPasswd.addTextChangedListener(loginTextWatcher);
@@ -108,10 +108,10 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("gilog", "Res:" + response.body());
                     if (!response.body().equals("error")) {
                         //Firebase
-                        auth.signInWithEmailAndPassword(email, passwd).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        /*auth.signInWithEmailAndPassword(email, passwd).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
+                                if (task.isSuccessful()) {*/
                                     SharedPreferences.Editor editor = sp.edit();
                                     editor.putString(KEY_ID, response.body());
                                     editor.putString("chefLoginID", response.body());
@@ -120,10 +120,10 @@ public class MainActivity extends AppCompatActivity {
                                     Intent intent = new Intent(MainActivity.this, homePage.class);
                                     startActivity(intent);
                                     finish();
-                                } else
+                                /*} else
                                     Toast.makeText(MainActivity.this, "Error:" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
-                        });
+                        });*/
                     } else
                         Toast.makeText(getApplicationContext(), "Wrong Detail", Toast.LENGTH_SHORT).show();
                 }

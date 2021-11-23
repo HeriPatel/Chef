@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,18 +33,20 @@ import retrofit2.Response;
 public class homePage extends AppCompatActivity {
     SharedPreferences sp;
     private static final String SHARED_PREF_NAME = "myPref";
-    private static final String KEY_ID = "ID";
     String chefId;
     TextView status, statustxt;
     Button doneAllOrder;
     ArrayList<itemsModel> itemsModelArrayList;
     RecyclerView recyclerView;
     ProgressDialog progressDialog;
+    LinearLayout noOrderLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
+
+        noOrderLayout = findViewById(R.id.noOrder);
 
         progressDialog = new ProgressDialog(this, R.style.MyAlertDialogStyle);
         progressDialog.setMax(100);
@@ -89,48 +92,132 @@ public class homePage extends AppCompatActivity {
         recyclerView.setLayoutManager(gridLayoutManager);
 
         APIinterface apIinterface = myRetro.getretrofit(getApplicationContext()).create(APIinterface.class);
-        apIinterface.chefStatus(Integer.parseInt(chefId)).enqueue(new Callback<String>() {
+
+        apIinterface.getDummyOrder().enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 progressDialog.dismiss();
-                //Log.d("gilog", "chefStatus res : " + response.body());
-                if (!response.body().equals("Error!")) {
-                    statustxt.setText(response.body());
-                    if (response.body().equals("Available")) {
-                        status.setTextColor(getResources().getColor(R.color.green));
-                        statustxt.setTextColor(getResources().getColor(R.color.green));
-                    } else {
-                        status.setTextColor(getResources().getColor(R.color.red));
-                        statustxt.setTextColor(getResources().getColor(R.color.red));
-                    }
+                if (!response.body().equals("error")) {
+                    apIinterface.addChef(Integer.parseInt(response.body()), Integer.parseInt(chefId)).enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(Call<String> call, Response<String> response) {
+                            apIinterface.loadChefOrder(Integer.parseInt(chefId)).enqueue(new Callback<ArrayList<itemsModel>>() {
+                                @Override
+                                public void onResponse(Call<ArrayList<itemsModel>> call, Response<ArrayList<itemsModel>> response) {
+                                    itemsModelArrayList = response.body();
+                                    Log.d("gilog", "load order res : " + itemsModelArrayList);
+                                    if (itemsModelArrayList.isEmpty()) {
+                                        doneAllOrder.setEnabled(false);
+                                    } else {
+                                        apIinterface.changeChefStatus(Integer.parseInt(chefId), "Occupied").enqueue(new Callback<String>() {
+                                            @Override
+                                            public void onResponse(Call<String> call, Response<String> response) {
+                                                apIinterface.chefStatus(Integer.parseInt(chefId)).enqueue(new Callback<String>() {
+                                                    @Override
+                                                    public void onResponse(Call<String> call, Response<String> response) {
+                                                        progressDialog.dismiss();
+                                                        if (!response.body().equals("Error!")) {
+                                                            statustxt.setText(response.body());
+                                                            if (response.body().equals("Available")) {
+                                                                noOrderLayout.setVisibility(View.VISIBLE);
+                                                                status.setTextColor(getResources().getColor(R.color.green));
+                                                                statustxt.setTextColor(getResources().getColor(R.color.green));
+                                                            } else {
+                                                                noOrderLayout.setVisibility(View.INVISIBLE);
+                                                                status.setTextColor(getResources().getColor(R.color.red));
+                                                                statustxt.setTextColor(getResources().getColor(R.color.red));
+                                                                doneAllOrder.setEnabled(true);
+                                                                orderAdapter orderAdapter = new orderAdapter(getApplicationContext(), itemsModelArrayList, status, statustxt, doneAllOrder, Integer.parseInt(chefId), recyclerView, noOrderLayout);
+                                                                recyclerView.setAdapter(orderAdapter);
+                                                            }
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(Call<String> call, Throwable t) {
+                                                        progressDialog.dismiss();
+                                                        Toast.makeText(homePage.this, "Error!", Toast.LENGTH_SHORT).show();
+                                                        Log.d("gilog", "in chef status : " + t.toString());
+                                                    }
+                                                });
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<String> call, Throwable t) {
+                                                Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
+                                                Log.d("gilog", "Error in chef status change : " + t.toString());
+                                            }
+                                        });
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<ArrayList<itemsModel>> call, Throwable t) {
+                                    Log.d("gilog", "Error in fetching order details : " + t.toString());
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onFailure(Call<String> call, Throwable t) {
+                            Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
+                            Log.d("gilog", "Error in adding chef id : " + t.toString());
+                        }
+                    });
+                } else {
+                    apIinterface.chefStatus(Integer.parseInt(chefId)).enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(Call<String> call, Response<String> response) {
+                            progressDialog.dismiss();
+                            //Log.d("gilog", "chefStatus res : " + response.body());
+                            if (!response.body().equals("Error!")) {
+                                statustxt.setText(response.body());
+                                if (response.body().equals("Available")) {
+                                    noOrderLayout.setVisibility(View.VISIBLE);
+                                    status.setTextColor(getResources().getColor(R.color.green));
+                                    statustxt.setTextColor(getResources().getColor(R.color.green));
+                                } else {
+                                    noOrderLayout.setVisibility(View.INVISIBLE);
+                                    status.setTextColor(getResources().getColor(R.color.red));
+                                    statustxt.setTextColor(getResources().getColor(R.color.red));
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<String> call, Throwable t) {
+                            progressDialog.dismiss();
+                            Toast.makeText(homePage.this, "Error!", Toast.LENGTH_SHORT).show();
+                            Log.d("gilog", "in chef status : " + t.toString());
+                        }
+                    });
+
+                    apIinterface.loadChefOrder(Integer.parseInt(chefId)).enqueue(new Callback<ArrayList<itemsModel>>() {
+                        @Override
+                        public void onResponse(Call<ArrayList<itemsModel>> call, Response<ArrayList<itemsModel>> response) {
+                            itemsModelArrayList = response.body();
+                            //Log.d("gilog", "itemmodelArraylist : " + itemsModelArrayList);
+                            if (itemsModelArrayList.isEmpty()) {
+                                doneAllOrder.setEnabled(false);
+                            } else {
+                                doneAllOrder.setEnabled(true);
+                                orderAdapter orderAdapter = new orderAdapter(getApplicationContext(), itemsModelArrayList, status, statustxt, doneAllOrder, Integer.parseInt(chefId), recyclerView, noOrderLayout);
+                                recyclerView.setAdapter(orderAdapter);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ArrayList<itemsModel>> call, Throwable t) {
+                            Log.d("gilog", "Error in fetching order details : " + t.toString());
+                        }
+                    });
                 }
             }
 
             @Override
             public void onFailure(Call<String> call, Throwable t) {
-                progressDialog.dismiss();
-                Toast.makeText(homePage.this, "Error!", Toast.LENGTH_SHORT).show();
-                Log.d("gilog", "in chef status : " + t.toString());
-            }
-        });
-
-        apIinterface.loadChefOrder(Integer.parseInt(chefId)).enqueue(new Callback<ArrayList<itemsModel>>() {
-            @Override
-            public void onResponse(Call<ArrayList<itemsModel>> call, Response<ArrayList<itemsModel>> response) {
-                itemsModelArrayList = response.body();
-                //Log.d("gilog", "itemmodelArraylist : " + itemsModelArrayList);
-                if (itemsModelArrayList.isEmpty()) {
-                    doneAllOrder.setEnabled(false);
-                } else {
-                    doneAllOrder.setEnabled(true);
-                    orderAdapter orderAdapter = new orderAdapter(getApplicationContext(), itemsModelArrayList, status, statustxt, doneAllOrder, Integer.parseInt(chefId),recyclerView);
-                    recyclerView.setAdapter(orderAdapter);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ArrayList<itemsModel>> call, Throwable t) {
-                Log.d("gilog", "Error in fetching order details : " + t.toString());
+                Toast.makeText(getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
+                Log.d("gilog", "Error in getting dummy order : " + t.toString());
             }
         });
     }
@@ -183,13 +270,12 @@ public class homePage extends AppCompatActivity {
                 apIinterface.changeChefStatus(Integer.parseInt(chefId), "Available").enqueue(new Callback<String>() {
                     @Override
                     public void onResponse(Call<String> call, Response<String> response) {
-                        Log.d("gilog", "Chef status change : " + response.body());
                         itemsModelArrayList.clear();
 
                         apIinterface.getDummyOrder().enqueue(new Callback<String>() {
                             @Override
                             public void onResponse(Call<String> call, Response<String> response) {
-                                if(!response.body().equals("error")) {
+                                if (!response.body().equals("error")) {
                                     apIinterface.addChef(Integer.parseInt(response.body()), Integer.parseInt(chefId)).enqueue(new Callback<String>() {
                                         @Override
                                         public void onResponse(Call<String> call, Response<String> response) {
@@ -202,7 +288,7 @@ public class homePage extends AppCompatActivity {
                                                         doneAllOrder.setEnabled(false);
                                                     } else {
                                                         doneAllOrder.setEnabled(true);
-                                                        orderAdapter orderAdapter = new orderAdapter(getApplicationContext(), itemsModelArrayList, status, statustxt, doneAllOrder, Integer.parseInt(chefId),recyclerView);
+                                                        orderAdapter orderAdapter = new orderAdapter(getApplicationContext(), itemsModelArrayList, status, statustxt, doneAllOrder, Integer.parseInt(chefId), recyclerView, noOrderLayout);
                                                         recyclerView.setAdapter(orderAdapter);
                                                     }
                                                 }
@@ -220,16 +306,16 @@ public class homePage extends AppCompatActivity {
                                             Log.d("gilog", "Error in adding chef id : " + t.toString());
                                         }
                                     });
-                                }
-                                else {
+                                } else {
                                     apIinterface.changeChefStatus(Integer.parseInt(chefId), "Available").enqueue(new Callback<String>() {
                                         @Override
                                         public void onResponse(Call<String> call, Response<String> response) {
                                             itemsModelArrayList.clear();
-                                            orderAdapter orderAdapter = new orderAdapter(getApplicationContext(), itemsModelArrayList, status, statustxt, doneAllOrder, Integer.parseInt(chefId),recyclerView);
+                                            orderAdapter orderAdapter = new orderAdapter(getApplicationContext(), itemsModelArrayList, status, statustxt, doneAllOrder, Integer.parseInt(chefId), recyclerView, noOrderLayout);
                                             recyclerView.setAdapter(orderAdapter);
 
                                             statustxt.setText("Available");
+                                            noOrderLayout.setVisibility(View.VISIBLE);
                                             status.setTextColor(getResources().getColor(R.color.green));
                                             statustxt.setTextColor(getResources().getColor(R.color.green));
                                             doneAllOrder.setEnabled(false);

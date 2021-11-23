@@ -2,6 +2,7 @@ package com.example.chef;
 
 import android.widget.EditText;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 import retrofit2.Call;
@@ -40,6 +41,9 @@ public interface APIinterface {
 
     @POST("addChef.php")
     Call<String> addChef(@Query("id") int id, @Query("chef_id") int chef_id);
+
+    @POST("update_password.php")
+    Call<String> updtPasswd(@Query("phone") BigInteger phone, @Query("passwd") String passwd);
 
     @Headers("Content-Type: application/json")
     @GET("insert_key.php")

@@ -7,8 +7,33 @@
     tools:context=".homePage">
 
     <LinearLayout
+        android:id="@+id/noOrder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/no_order" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-10dp"
+            android:text="No Order Left"
+            android:textColor="@color/main"
+            android:textSize="20dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_margin="15dp"
         android:orientation="vertical">
 
@@ -55,12 +80,18 @@
                 android:textSize="17dp" />
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/orderRV"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginTop="10dp"
-            android:layout_marginBottom="100dp" />
+            android:layout_marginBottom="100dp"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/orderRV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -73,10 +104,10 @@
         <Button
             android:id="@+id/doneAllOrder"
             android:layout_width="0dp"
-            android:enabled="false"
             android:layout_height="wrap_content"
             android:layout_marginRight="2dp"
             android:layout_weight="0.5"
+            android:enabled="false"
             android:onClick="doneAll"
             android:text="All Done"
             android:textStyle="bold" />

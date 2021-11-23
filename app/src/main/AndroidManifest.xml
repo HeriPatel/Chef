@@ -12,7 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Chef"
         android:usesCleartextTraffic="true">
-        <activity android:name=".FrgtPasswd"></activity>
+        <activity android:name=".update_password"></activity>
+        <activity android:name=".otp_scrn" />
+        <activity android:name=".FrgtPasswd" />
         <activity android:name=".signUp" />
         <activity android:name=".homePage" />
         <activity android:name=".MainActivity">

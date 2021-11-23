@@ -30,7 +30,7 @@ public class signUp extends AppCompatActivity {
     EditText chefEmail, chefName, chefPasswd, chefConfrmPasswd, chefPhone;
     ProgressDialog progressDialog;
     Button chefSignUp;
-    FirebaseAuth auth;
+    //FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +43,7 @@ public class signUp extends AppCompatActivity {
         chefConfrmPasswd = findViewById(R.id.CnfrmPasswd);
         chefSignUp = findViewById(R.id.signupBtn);
 
-        auth = FirebaseAuth.getInstance();
+        //auth = FirebaseAuth.getInstance();
 
         chefEmail.addTextChangedListener(textWatcher);
         chefName.addTextChangedListener(textWatcher);
@@ -51,10 +51,10 @@ public class signUp extends AppCompatActivity {
         chefPasswd.addTextChangedListener(textWatcher);
         chefConfrmPasswd.addTextChangedListener(textWatcher);
 
-        if (auth.getCurrentUser() != null) {
+        /*if (auth.getCurrentUser() != null) {
             startActivity(new Intent(this, homePage.class));
             finish();
-        }
+        }*/
     }
 
     private TextWatcher textWatcher = new TextWatcher() {
@@ -119,17 +119,17 @@ public class signUp extends AppCompatActivity {
                         progressDialog.dismiss();
                         if (!response.body().equals("error")) {
                             //Firebase
-                            auth.createUserWithEmailAndPassword(email, passwd).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            /*auth.createUserWithEmailAndPassword(email, passwd).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
-                                    if (task.isSuccessful()) {
+                                    if (task.isSuccessful()) {*/
                                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                         startActivity(intent);
-                                    } else {
+                                    /*} else {
                                         Toast.makeText(signUp.this, "Error : " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                     }
                                 }
-                            });
+                            });*/
                         } else
                             Toast.makeText(signUp.this, "Error!", Toast.LENGTH_SHORT).show();
 

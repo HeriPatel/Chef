@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,8 +31,9 @@ public class orderAdapter extends RecyclerView.Adapter<orderAdapter.ViewHolder> 
     private Button doneAllORder;
     private int chefId;
     private RecyclerView recyclerView;
+    private LinearLayout noOrderLayout;
 
-    public orderAdapter(Context context, ArrayList<itemsModel> itemsModelArrayList,TextView status,TextView statusTxt,Button doneAllOrder,int chefId,RecyclerView recyclerView) {
+    public orderAdapter(Context context, ArrayList<itemsModel> itemsModelArrayList,TextView status,TextView statusTxt,Button doneAllOrder,int chefId,RecyclerView recyclerView,LinearLayout noOrderLayout) {
         this.context = context;
         this.itemsModelArrayList = itemsModelArrayList;
         this.status = status;
@@ -39,6 +41,7 @@ public class orderAdapter extends RecyclerView.Adapter<orderAdapter.ViewHolder> 
         this.doneAllORder = doneAllOrder;
         this.chefId = chefId;
         this.recyclerView = recyclerView;
+        this.noOrderLayout = noOrderLayout;
     }
 
     @NonNull
@@ -102,7 +105,7 @@ public class orderAdapter extends RecyclerView.Adapter<orderAdapter.ViewHolder> 
                                                                         doneAllORder.setEnabled(false);
                                                                     } else {
                                                                         doneAllORder.setEnabled(true);
-                                                                        orderAdapter orderAdapter = new orderAdapter(context, itemsModelArrayList, status, statusTxt, doneAllORder, chefId,recyclerView);
+                                                                        orderAdapter orderAdapter = new orderAdapter(context, itemsModelArrayList, status, statusTxt, doneAllORder, chefId,recyclerView,noOrderLayout);
                                                                         recyclerView.setAdapter(orderAdapter);
                                                                     }
                                                                 }
@@ -130,6 +133,7 @@ public class orderAdapter extends RecyclerView.Adapter<orderAdapter.ViewHolder> 
                                                             recyclerView.setAdapter(orderAdapter);*/
 
                                                             statusTxt.setText("Available");
+                                                            noOrderLayout.setVisibility(View.VISIBLE);
                                                             status.setTextColor(context.getResources().getColor(R.color.green));
                                                             statusTxt.setTextColor(context.getResources().getColor(R.color.green));
                                                             doneAllORder.setEnabled(false);
